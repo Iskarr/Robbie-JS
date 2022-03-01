@@ -333,23 +333,29 @@ function moveforward() {
     move(1);
   });
 }
-function moveforward(number) {
-  queue.push(function () {
-    move(number);
-  });
-}
-function moveForward(number) {
-  queue.push(function () {
-    move(number);
-  });
-}
 function moveForward() {
   queue.push(function () {
     move(1);
   });
 }
+function moveforth(number) {
+  queue.push(function () {
+    move(number);
+  });
+}
+function moveForth(number) {
+  queue.push(function () {
+    move(number);
+  });
+}
+
 // backward functions
 function movebackward() {
+  queue.push(function () {
+    move(-1);
+  });
+}
+function moveBackward() {
   queue.push(function () {
     move(-1);
   });
@@ -364,11 +370,7 @@ function moveBackward(number) {
     move(-number);
   });
 }
-function moveBackward() {
-  queue.push(function () {
-    move(-1);
-  });
-}
+
 // turn right functions
 function turnright() {
   queue.push(function () {
