@@ -360,12 +360,12 @@ function moveBackward() {
     move(-1);
   });
 }
-function movebackward(number) {
+function moveback(number) {
   queue.push(function () {
     move(-number);
   });
 }
-function moveBackward(number) {
+function moveBack(number) {
   queue.push(function () {
     move(-number);
   });
