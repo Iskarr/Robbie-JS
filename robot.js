@@ -328,22 +328,12 @@ var cellSize = dotMargin + dotDiam + dotMargin;
 var queue = new Array();
 
 // forward functions
-function moveforward() {
-  queue.push(function () {
-    move(1);
-  });
-}
-function moveForward() {
-  queue.push(function () {
-    move(1);
-  });
-}
-function moveforth(number) {
+function moveforward(number) {
   queue.push(function () {
     move(number);
   });
 }
-function moveForth(number) {
+function moveForward(number) {
   queue.push(function () {
     move(number);
   });
