@@ -93,7 +93,12 @@ function setup(type) {
 
   // Create image nodes for the dots and place them in the arena.
   for (var i = 0; i < 35; i++) {
-    arena.appendChild(createDot());
+    var dot = createDot();
+    if (i === 34) {
+      // Check if it's the last iteration
+      dot = createGreenDot();
+    }
+    arena.appendChild(dot);
   }
 
   // Create the image node for the robot and place it in the arena.
@@ -109,6 +114,16 @@ function createDot() {
   var dot = document.createElement("img");
   dot.className = "dot";
   dot.src = "dot.png";
+  dot.alt = "Dot";
+  return dot;
+}
+
+function createGreenDot() {
+  var dot = document.createElement("img");
+  dot.className = "dot";
+  dot.src = "greendot.png";
+  dot.alt = "Dot";
+  dot.width = 7;
   return dot;
 }
 
@@ -310,7 +325,9 @@ function clearCode() {
   editor.getSession().setTabSize(4);
   editor.getSession().setUseSoftTabs(true);
   if (displayFunction) {
-    editor.setValue("function run() {\n\t//Your code goes here.\n}");
+    editor.setValue(
+      "function run() {\n\t//Write your functions below this line: \n\n\n\n\n\n\n\n\n\n}"
+    );
   } else {
     editor.setValue("//Your code goes here.");
   }
@@ -340,22 +357,12 @@ function moveForward(number) {
 }
 
 // backward functions
-function movebackward() {
-  queue.push(function () {
-    move(-1);
-  });
-}
-function moveBackward() {
-  queue.push(function () {
-    move(-1);
-  });
-}
-function moveback(number) {
+function movebackward(number) {
   queue.push(function () {
     move(-number);
   });
 }
-function moveBack(number) {
+function moveBackward(number) {
   queue.push(function () {
     move(-number);
   });
@@ -587,4 +594,63 @@ function readFile() {
 function setActiveAssignButton(assignTitle) {
   var buttonId = assignTitle + "Button";
   getId(buttonId).className += " active";
+}
+
+// Function to trigger confetti using canvas-confetti library
+function throwConfetti() {
+  // Check if the confetti library is loaded
+  if (typeof confetti === "function") {
+    // Create multiple confetti bursts from different horizontal positions
+    const confettiSettings = {
+      particleCount: 100,
+      spread: 100,
+      startVelocity: 30,
+      ticks: 80,
+      origin: { y: 0 }, // Launch from slightly below the center of the screen
+    };
+
+    // Launch confetti from different horizontal positions
+
+    // moveforward(6)
+    // turnRight()
+    // moveforward(4)
+    for (let i = 0; i < 20; i++) {
+      confetti({
+        ...confettiSettings,
+        origin: {
+          x: Math.random(), // Random horizontal position
+          y: Math.random(), // Random vertical position to cover entire screen
+        },
+      });
+    }
+  } else {
+    console.warn("Confetti library is not loaded.");
+  }
+}
+
+// Update the runQueue function to check if the robot is on the green dot
+function runQueue() {
+  var aFunction = queue.shift();
+  if (aFunction) {
+    aFunction();
+
+    // Check if the robot is on the green dot
+    var robot = getId("robot");
+    var greenDot = document.querySelector(".dot[src='greendot.png']");
+    var robotPosition = offset(robot);
+    var greenDotPosition = offset(greenDot);
+
+    // Check if the positions match (within a tolerance range)
+    var tolerance = 5; // pixels
+    var onGreenDot =
+      Math.abs(robotPosition.left - greenDotPosition.left) < tolerance &&
+      Math.abs(robotPosition.top - greenDotPosition.top) < tolerance;
+
+    // If the robot is on the green dot or the last iteration, trigger confetti
+    if (onGreenDot || queue.length === 0) {
+      throwConfetti();
+    }
+
+    setTimeout(runQueue, 1000);
+  }
 }
