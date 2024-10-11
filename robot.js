@@ -355,6 +355,11 @@ function moveForward(number) {
     move(number);
   });
 }
+function movefoward(number) {
+  queue.push(function () {
+    move(number);
+  });
+}
 
 // backward functions
 function movebackward(number) {
@@ -369,23 +374,23 @@ function moveBackward(number) {
 }
 
 // turn right functions
-function turnright() {
+function turnright(number) {
   queue.push(function () {
     rotate(90);
   });
 }
 function turnRight() {
-  queue.push(function () {
+  queue.push(function (number) {
     rotate(90);
   });
 }
 // turn left functions
-function turnleft() {
+function turnleft(number) {
   queue.push(function () {
     rotate(-90);
   });
 }
-function turnLeft() {
+function turnLeft(number) {
   queue.push(function () {
     rotate(-90);
   });
@@ -611,8 +616,8 @@ function throwConfetti() {
 
     // Launch confetti from different horizontal positions
 
-    // moveforward(6)
-    // turnRight()
+    //  moveforward(6)
+    //  turnRight()
     // moveforward(4)
     for (let i = 0; i < 20; i++) {
       confetti({
@@ -628,28 +633,65 @@ function throwConfetti() {
   }
 }
 
-// Update the runQueue function to check if the robot is on the green dot
 function runQueue() {
   var aFunction = queue.shift();
   if (aFunction) {
     aFunction();
 
-    // Check if the robot is on the green dot
+    // Check if the robot is on the green dot (last dot)
     var robot = getId("robot");
     var greenDot = document.querySelector(".dot[src='greendot.png']");
+    var arena = getId("arena");
+
+    if (!robot || !greenDot || !arena) {
+      console.warn("Robot, green dot, or arena not found.");
+      setTimeout(runQueue, 1000);
+      return;
+    }
+
+    // Calculate relative positions within the arena
     var robotPosition = offset(robot);
     var greenDotPosition = offset(greenDot);
+    var arenaPosition = offset(arena);
+
+    // Adjust positions to be relative to the arena
+    var robotLeft = robotPosition.left - arenaPosition.left;
+    var robotTop = robotPosition.top - arenaPosition.top;
+    var greenDotLeft = greenDotPosition.left - arenaPosition.left;
+    var greenDotTop = greenDotPosition.top - arenaPosition.top;
 
     // Check if the positions match (within a tolerance range)
-    var tolerance = 5; // pixels
+    var tolerance = 63; // Increase tolerance to account for discrepancies
     var onGreenDot =
-      Math.abs(robotPosition.left - greenDotPosition.left) < tolerance &&
-      Math.abs(robotPosition.top - greenDotPosition.top) < tolerance;
+      Math.abs(robotLeft - greenDotLeft) <= tolerance &&
+      Math.abs(robotTop - greenDotTop) <= tolerance;
 
-    // If the robot is on the green dot or the last iteration, trigger confetti
-    if (onGreenDot || queue.length === 0) {
+    // If the robot is on the last dot (green dot), trigger confetti
+    if (onGreenDot || robotLeft === greenDotLeft || robotTop === greenDotTop) {
+      console.log("Triggering confetti...");
+      console.log(robotLeft, greenDotLeft, robotTop, greenDotTop);
       throwConfetti();
     }
+
+    // Perform an additional check after all other operations
+    setTimeout(() => {
+      var finalRobotPosition = offset(robot);
+      var finalRobotLeft = finalRobotPosition.left - arenaPosition.left;
+      var finalRobotTop = finalRobotPosition.top - arenaPosition.top;
+
+      var finalOnGreenDot =
+        Math.abs(finalRobotLeft - greenDotLeft) <= tolerance &&
+        Math.abs(finalRobotTop - greenDotTop) <= tolerance;
+
+      console.log(finalRobotLeft, finalRobotTop, "Final robot position");
+
+      if (finalOnGreenDot) {
+        console.log(
+          "Robot is finally on the green dot. Triggering confetti again..."
+        );
+        throwConfetti();
+      }
+    }, 500); // Check after 500ms delay
 
     setTimeout(runQueue, 1000);
   }
